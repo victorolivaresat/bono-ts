@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sistema de Gestión de Bonos
 
-## Getting Started
+Aplicación completa de gestión de bonos con autenticación, construida con Next.js 15, TypeScript, Prisma, PostgreSQL y shadcn/ui.
 
-First, run the development server:
+## 🚀 Características
+
+- ✅ Sistema de autenticación completo (registro e inicio de sesión)
+- ✅ Gestión CRUD de bonos
+- ✅ Validación y seguimiento de bonos
+- ✅ Panel de administración con filtros y búsqueda
+- ✅ Interfaz moderna con shadcn/ui
+- ✅ Base de datos PostgreSQL con Prisma ORM
+- ✅ Protección de rutas con middleware
+- ✅ Formularios validados con Zod y React Hook Form
+
+## 📋 Requisitos Previos
+
+- Node.js 18+
+- PostgreSQL instalado y ejecutándose
+- pnpm (recomendado) o npm
+
+## ⚡ Inicio Rápido
+
+### 1. Instalar dependencias
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configurar PostgreSQL
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Crea la base de datos:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+createdb bonos_db
+```
 
-## Learn More
+### 3. Configurar variables de entorno
 
-To learn more about Next.js, take a look at the following resources:
+Edita `.env` con tus credenciales de PostgreSQL:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+DATABASE_URL="postgresql://TU_USUARIO:TU_CONTRASEÑA@localhost:5432/bonos_db?schema=public"
+NEXTAUTH_SECRET="tu-secreto-muy-seguro"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Configurar Prisma
 
-## Deploy on Vercel
+```bash
+# Genera el cliente de Prisma
+npx prisma generate
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Ejecuta las migraciones
+npx prisma migrate dev --name init
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Opcional: Poblar con datos de ejemplo
+pnpm db:seed
+```
+
+### 5. Iniciar la aplicación
+
+```bash
+pnpm dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000)
+
+**Credenciales de prueba** (si ejecutaste el seed):
+
+- Email: `admin@bonos.com`
+- Password: `admin123`
+
+---
+
+## 📖 Documentación Completa
+
+Ver [SETUP.md](./SETUP.md) para instrucciones detalladas, solución de problemas y más información.
+
+## 🗄️ Estructura del Proyecto
+
+```
+bonus-ts/
+├── app/                    # App Router de Next.js
+│   ├── api/               # API Routes
+│   ├── dashboard/         # Panel de administración
+│   ├── login/            # Página de inicio de sesión
+│   └── register/         # Página de registro
+├── components/            # Componentes React
+│   ├── ui/               # Componentes de shadcn/ui
+│   ├── bonos-dashboard.tsx
+│   └── bono-dialog.tsx
+├── prisma/               # Configuración de Prisma
+│   ├── schema.prisma    # Esquema de base de datos
+│   └── seed.ts          # Script de seed
+└── lib/                 # Utilidades
+```
+
+## 🛠️ Scripts Disponibles
+
+```bash
+pnpm dev          # Modo desarrollo
+pnpm build        # Build producción
+pnpm start        # Ejecutar producción
+pnpm lint         # Linter
+pnpm db:push      # Push schema a BD (dev)
+pnpm db:seed      # Poblar base de datos
+pnpm db:studio    # Abrir Prisma Studio
+```
+
+## 📦 Tecnologías
+
+- **Framework**: Next.js 15 (App Router)
+- **Lenguaje**: TypeScript
+- **Base de Datos**: PostgreSQL + Prisma
+- **Autenticación**: NextAuth v5
+- **UI**: shadcn/ui + Tailwind CSS v4
+- **Validación**: Zod + React Hook Form
+
+## 🔒 Características de Seguridad
+
+- Contraseñas hasheadas con bcryptjs
+- Sesiones JWT seguras
+- Validación de datos con Zod
+- Rutas protegidas con middleware
+- Variables de entorno para secretos
+
+## 📄 Licencia
+
+MIT
