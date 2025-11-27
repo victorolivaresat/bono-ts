@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Aplicación Next.js
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bono-ts-app
+    restart: unless-stopped
+    ports:
+      - "3070:3000"  # Puerto externo:interno
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://bono_user:bono_password@db:5432/bono_db
+      - NEXTAUTH_URL=http://localhost:3070
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-change-this-secret-in-production}
+      - RUN_SEED=false  # Cambiar a 'true' solo la primera vez si quieres seed
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - bono-network
+    volumes:
+      # Volumen para logs si es necesario
+      - ./logs:/app/logs
+
+  # Base de datos PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: bono-ts-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=bono_user
+      - POSTGRES_PASSWORD=bono_password
+      - POSTGRES_DB=bono_db
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"  # Exponer para acceso externo si es necesario
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - bono-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bono_user -d bono_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  bono-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
