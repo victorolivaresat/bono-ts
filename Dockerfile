@@ -50,6 +50,7 @@ COPY --from=builder /app/next.config.* ./
 
 EXPOSE 3000
 ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Comando simple - el command en docker-compose manejará las migraciones
 CMD ["node", ".next/standalone/server.js"]
