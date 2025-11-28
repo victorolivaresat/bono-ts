@@ -49,4 +49,4 @@ EXPOSE 3000
 ENV PORT=3000
 
 # Comando simple - el command en docker-compose manejará las migraciones
-CMD ["node", "server.js"]
+CMD ["node", ".next/standalone/server.js"]

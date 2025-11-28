@@ -52,7 +52,7 @@ services:
         echo 'Ejecutando seed...' &&
         pnpm db:seed || echo 'Seed falló o no existe' &&
         echo 'Iniciando aplicación...' &&
-        node server.js
+        node .next/standalone/server.js
       "
 
 volumes:
