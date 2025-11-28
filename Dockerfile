@@ -10,7 +10,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
 
-# Instalar dependencias de producción y desarrollo
+# Instalar dependencias
 RUN pnpm install --frozen-lockfile
 
 # Etapa 2: Builder
@@ -21,14 +21,11 @@ WORKDIR /app
 # Instalar pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copiar dependencias desde deps
+# Copiar todo desde deps
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generar Prisma Client en builder
-RUN pnpm prisma generate
-
-# Build de la aplicación
+# Build (ya incluye prisma generate por el script)
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN pnpm build
 
@@ -43,18 +40,19 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copiar archivos necesarios del build
+# Habilitar pnpm para ejecutar prisma
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copiar archivos del build
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copiar prisma schema y Prisma Client generado
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-
-# Copiar package.json para prisma CLI
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/pnpm-lock.yaml ./pnpm-lock.yaml
+
+# Instalar solo Prisma CLI y dependencias de producción en runtime
+RUN pnpm install --prod --frozen-lockfile
 
 USER nextjs
 
