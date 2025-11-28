@@ -46,6 +46,7 @@ COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder /app/next.config.* ./
 
 EXPOSE 3000
+ENV PORT=3000
 
 # Comando simple - el command en docker-compose manejará las migraciones
-CMD ["pnpm", "start"]
+CMD ["node", "server.js"]
