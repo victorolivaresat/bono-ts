@@ -21,9 +21,12 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
-# Generar Prisma Client y hacer build
+# Limitar memoria y workers para el build
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
+# Generar Prisma Client y hacer build con menos workers
 RUN pnpm prisma generate
-RUN pnpm build
+RUN pnpm build -- --experimental-build-mode=compile
 
 # Stage 2: Production
 FROM node:20-alpine AS production
