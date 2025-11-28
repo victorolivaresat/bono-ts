@@ -16,6 +16,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -37,15 +39,21 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       NEXTAUTH_URL: ${NEXTAUTH_URL}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NODE_ENV: production
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - app-network
     command: >
       sh -c "
-        npx prisma db push &&
-        npx prisma db seed &&
-        node server.js
+        pnpm prisma db push &&
+        pnpm db:seed &&
+        pnpm start
       "
 
 volumes:
   postgres_data:
+
+networks:
+  app-network:

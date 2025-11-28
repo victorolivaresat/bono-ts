@@ -1,12 +1,13 @@
-# Etapa 1: Dependencias
-FROM node:20-alpine AS deps
+# Stage 1: Install dependencies and build
+FROM node:20-alpine AS builder
+
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 # Instalar pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copiar archivos de dependencias
+# Copiar package files
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
@@ -14,53 +15,30 @@ COPY prisma.config.ts ./
 # Instalar dependencias
 RUN pnpm install --frozen-lockfile
 
-# Etapa 2: Builder
-FROM node:20-alpine AS builder
-RUN apk add --no-cache openssl libc6-compat
-WORKDIR /app
-
-# Instalar pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# Copiar todo desde deps
-COPY --from=deps /app/node_modules ./node_modules
+# Copiar código fuente
 COPY . .
 
-# Build (prisma generate no necesita conexión real a BD)
+# Build (con DATABASE_URL dummy para prisma generate)
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV DATABASE_URL="postgresql://build:build@localhost:5432/buildtime"
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN pnpm build
 
-# Etapa 3: Runner
-FROM node:20-alpine AS runner
+# Stage 2: Production
+FROM node:20-alpine AS production
+
 RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copiar archivos del build standalone (incluye node_modules necesarios)
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Copiar schema de Prisma y configuración
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
-
-# El standalone de Next.js ya incluye @prisma/client en node_modules
-# Solo necesitamos copiar el CLI de Prisma para migraciones
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-
-USER nextjs
+# Copiar node_modules y build
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-CMD ["node", "server.js"]
+CMD ["pnpm", "start"]
