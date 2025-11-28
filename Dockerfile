@@ -47,6 +47,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Instalar pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Crear usuario no-root para seguridad
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -54,6 +57,7 @@ RUN adduser --system --uid 1001 nextjs
 # Copiar archivos necesarios de la etapa builder
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 
 # Copiar archivos de build de Next.js
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -61,8 +65,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copiar Prisma schema y migraciones
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copiar todo node_modules (necesario para pnpm y Prisma)
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Script de inicio
 COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
