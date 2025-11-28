@@ -26,8 +26,9 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build (ya incluye prisma generate por el script)
+# Build (prisma generate no necesita conexión real a BD)
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/buildtime"
 RUN pnpm build
 
 # Etapa 3: Runner
