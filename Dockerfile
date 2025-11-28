@@ -9,6 +9,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Copiar archivos de dependencias
 COPY package.json pnpm-lock.yaml ./
 COPY prisma ./prisma/
+COPY prisma.config.ts ./
 
 # Instalar dependencias
 RUN pnpm install --frozen-lockfile
@@ -45,8 +46,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copiar schema de Prisma
+# Copiar schema de Prisma y configuración
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 
 # Copiar node_modules de Prisma desde deps (versión correcta 5.22.0)
 COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
