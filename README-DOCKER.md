@@ -13,7 +13,11 @@ nano .env
 
 Edita con tus datos reales:
 ```env
-DATABASE_URL="postgresql://tu_usuario:tu_password@localhost:5432/tu_bd"
+# Para conectar desde el contenedor a PostgreSQL del host, usa:
+# - host.docker.internal (recomendado en Docker 20.10+)
+# - 172.17.0.1 (gateway por defecto)
+# - IP real de tu servidor
+DATABASE_URL="postgresql://tu_usuario:tu_password@host.docker.internal:5432/tu_bd"
 NEXTAUTH_URL="http://tu-servidor:3070"
 NEXTAUTH_SECRET="genera-con: openssl rand -base64 32"
 ```
@@ -38,8 +42,11 @@ docker-compose down
 
 ## 📝 Notas
 
-- Puerto: **3070** (mapea al 3000 interno)
-- Usa `network_mode: host` para conectarse a PostgreSQL local
+- **Puerto expuesto:** `3070:3000` (línea 7 de docker-compose.yml)
+- Para conectar a PostgreSQL del host desde el contenedor:
+  - Usa `host.docker.internal` en DATABASE_URL (Docker 20.10+)
+  - O usa `172.17.0.1` (gateway de Docker)
+  - O usa la IP real del servidor
 - Lee variables desde `.env` automáticamente
 - PostgreSQL debe estar corriendo en el servidor
 

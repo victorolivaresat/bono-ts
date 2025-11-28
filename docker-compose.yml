@@ -3,5 +3,7 @@ services:
     build: .
     container_name: bono-ts-app
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "3070:3000"
+    network_mode: bridge
     env_file: .env
