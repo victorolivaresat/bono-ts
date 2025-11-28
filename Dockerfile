@@ -1,6 +1,6 @@
 # Etapa 1: Dependencias
 FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 # Instalar pnpm
@@ -13,29 +13,28 @@ COPY prisma ./prisma/
 # Instalar dependencias
 RUN pnpm install --frozen-lockfile
 
+# Generar Prisma Client
+RUN pnpm prisma generate
+
 # Etapa 2: Builder
 FROM node:20-alpine AS builder
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Instalar pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copiar dependencias desde deps
+# Copiar dependencias desde deps (incluyendo Prisma Client generado)
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Generar Prisma Client ANTES del build
-RUN npx prisma generate
 
 # Build de la aplicación
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN pnpm build
 
-# Asegurar que Prisma Client esté generado
-RUN npx prisma generate
-
 # Etapa 3: Runner
 FROM node:20-alpine AS runner
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 ENV NODE_ENV production
@@ -51,9 +50,9 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
 
-# Copiar Prisma Client generado
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# Copiar node_modules completo desde deps (incluye Prisma Client)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
 
