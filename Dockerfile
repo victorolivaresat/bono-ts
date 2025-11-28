@@ -40,19 +40,18 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Habilitar pnpm para ejecutar prisma
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# Copiar archivos del build
+# Copiar archivos del build standalone (incluye node_modules necesarios)
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=nextjs:nodejs /app/pnpm-lock.yaml ./pnpm-lock.yaml
 
-# Instalar solo Prisma CLI y dependencias de producción en runtime
-RUN pnpm install --prod --frozen-lockfile
+# Copiar schema de Prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+
+# Copiar node_modules de Prisma desde deps (versión correcta 5.22.0)
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 
 USER nextjs
 
