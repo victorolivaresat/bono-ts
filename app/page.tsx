@@ -28,9 +28,6 @@ export default function Home() {
             <Button asChild size="lg" className="w-full">
               <Link href="/login">Iniciar Sesión</Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="w-full">
-              <Link href="/register">Crear Cuenta</Link>
-            </Button>
           </div>
         </CardContent>
       </Card>
