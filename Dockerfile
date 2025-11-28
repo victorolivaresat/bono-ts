@@ -24,12 +24,15 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generar Prisma Client
-RUN pnpm prisma generate
+# Generar Prisma Client ANTES del build
+RUN npx prisma generate
 
 # Build de la aplicación
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN pnpm build
+
+# Asegurar que Prisma Client esté generado
+RUN npx prisma generate
 
 # Etapa 3: Runner
 FROM node:20-alpine AS runner
@@ -46,11 +49,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-# Copiar script de inicio
 COPY --from=builder /app/package.json ./package.json
+
+# Copiar Prisma Client generado
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
 USER nextjs
 
