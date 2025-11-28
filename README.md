@@ -42,7 +42,6 @@ Edita `.env` con tus credenciales de PostgreSQL:
 ```env
 DATABASE_URL="postgresql://TU_USUARIO:TU_CONTRASEÑA@localhost:5432/bonos_db?schema=public"
 NEXTAUTH_SECRET="tu-secreto-muy-seguro"
-NEXTAUTH_URL="http://localhost:3000"
 ```
 
 ### 4. Configurar Prisma
@@ -66,35 +65,7 @@ pnpm dev
 
 Abre [http://localhost:3000](http://localhost:3000)
 
-**Credenciales de prueba** (si ejecutaste el seed):
-
-- Email: `admin@bonos.com`
-- Password: `admin123`
-
 ---
-
-## 📖 Documentación Completa
-
-Ver [SETUP.md](./SETUP.md) para instrucciones detalladas, solución de problemas y más información.
-
-## 🗄️ Estructura del Proyecto
-
-```
-bonus-ts/
-├── app/                    # App Router de Next.js
-│   ├── api/               # API Routes
-│   ├── dashboard/         # Panel de administración
-│   ├── login/            # Página de inicio de sesión
-│   └── register/         # Página de registro
-├── components/            # Componentes React
-│   ├── ui/               # Componentes de shadcn/ui
-│   ├── bonos-dashboard.tsx
-│   └── bono-dialog.tsx
-├── prisma/               # Configuración de Prisma
-│   ├── schema.prisma    # Esquema de base de datos
-│   └── seed.ts          # Script de seed
-└── lib/                 # Utilidades
-```
 
 ## 🛠️ Scripts Disponibles
 
