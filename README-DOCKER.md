@@ -26,9 +26,15 @@ openssl rand -base64 32
 nano .env
 ```
 
-Cambia estos valores en `.env`:
+**IMPORTANTE:** Cambia estos valores en `.env`:
 ```env
+# Tu base de datos PostgreSQL existente
+DATABASE_URL="postgresql://tu_usuario:tu_password@localhost:5432/tu_base_datos"
+
+# Secret generado
 NEXTAUTH_SECRET="pega-aqui-el-secret-generado"
+
+# URL de tu servidor
 NEXTAUTH_URL="http://tu-servidor-ip:3070"
 ```
 
