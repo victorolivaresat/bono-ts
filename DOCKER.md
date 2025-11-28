@@ -5,6 +5,7 @@
 Esta aplicación Next.js está completamente dockerizada y lista para desplegarse en cualquier servidor Linux. Incluye:
 
 - ✅ Aplicación Next.js optimizada con multi-stage build
+- ✅ Gestor de paquetes: **pnpm**
 - ✅ Base de datos PostgreSQL 16
 - ✅ Migraciones automáticas de Prisma
 - ✅ Health checks integrados

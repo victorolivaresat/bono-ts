@@ -8,9 +8,12 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
+# Instalar pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copiar archivos de dependencias
-COPY package.json package-lock.json* ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # =====================================
 # Etapa 2: Builder
@@ -19,17 +22,20 @@ FROM node:20-alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
+# Instalar pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 # Copiar dependencias instaladas
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generar Prisma Client
-RUN npx prisma generate
+RUN pnpm exec prisma generate
 
 # Build de Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
-RUN npm run build
+RUN pnpm run build
 
 # =====================================
 # Etapa 3: Runner (Producción)

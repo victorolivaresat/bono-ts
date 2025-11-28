@@ -18,14 +18,14 @@ done
 
 # Ejecutar migraciones de Prisma
 echo "📦 Ejecutando migraciones de Prisma..."
-npx prisma migrate deploy || {
+node node_modules/.bin/prisma migrate deploy || {
   echo "⚠️  Las migraciones fallaron, pero continuando..."
 }
 
 # Ejecutar seed si es la primera vez (opcional)
 if [ "$RUN_SEED" = "true" ]; then
   echo "🌱 Ejecutando seed de base de datos..."
-  npm run db:seed || {
+  node node_modules/.bin/prisma db seed || {
     echo "⚠️  El seed falló, pero continuando..."
   }
 fi
