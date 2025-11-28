@@ -1,20 +1,7 @@
-version: '3.8'
-
 services:
-  # Aplicación Next.js
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: bono-ts-app
     restart: unless-stopped
-    ports:
-      - "3070:3000"  # Puerto externo:interno
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3070}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - RUN_SEED=${RUN_SEED:-false}
-    # Usar network host para conectarse a la BD del servidor
-    network_mode: "host"
+    network_mode: host
+    env_file: .env
