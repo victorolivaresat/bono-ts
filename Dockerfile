@@ -26,7 +26,7 @@ ENV NODE_OPTIONS="--max-old-space-size=1024"
 
 # Generar Prisma Client y hacer build con menos workers
 RUN pnpm prisma generate
-RUN pnpm build -- --experimental-build-mode=compile
+RUN pnpm build
 
 # Stage 2: Production
 FROM node:20-alpine AS production
