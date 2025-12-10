@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,27 +8,25 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String
-  role      String   @default("user") // user, admin
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id             String         @id @default(cuid())
+  email          String         @unique
+  password       String
+  name           String
+  role           String         @default("user")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   validatedBonos BonoAsignado[] @relation("ValidatedBy")
 }
 
 model TipoBono {
-  id             String   @id @default(cuid())
-  nombre         String   @unique
-  descripcion    String?  @db.Text
+  id             String         @id @default(cuid())
+  nombre         String         @unique
+  descripcion    String?
   fechaInicio    DateTime
   fechaFin       DateTime
-  activo         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
+  activo         Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   bonosAsignados BonoAsignado[]
 
   @@index([activo])
@@ -39,21 +34,21 @@ model TipoBono {
 }
 
 model BonoAsignado {
-  id                String    @id @default(cuid())
-  ticketNumber      String?
-  tipoBonoId        String
-  tipoBono          TipoBono  @relation(fields: [tipoBonoId], references: [id], onDelete: Cascade)
-  clientName        String
-  documentNumber    String
-  documentType      String    // DNI, Pasaporte, etc.
-  phoneNumber       String
-  status            String    @default("activo") // cobrado, no_cobrado, activo, inactivo
-  observations      String?   @db.Text
-  validatedBy       String?
-  validatedByUser   User?     @relation("ValidatedBy", fields: [validatedBy], references: [id])
-  validatedAt       DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  ticketNumber    String?
+  tipoBonoId      String
+  clientName      String
+  documentNumber  String
+  documentType    String
+  phoneNumber     String
+  status          String    @default("activo")
+  observations    String?
+  validatedBy     String?
+  validatedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  tipoBono        TipoBono  @relation(fields: [tipoBonoId], references: [id], onDelete: Cascade)
+  validatedByUser User?     @relation("ValidatedBy", fields: [validatedBy], references: [id])
 
   @@unique([documentType, documentNumber])
   @@index([ticketNumber])
